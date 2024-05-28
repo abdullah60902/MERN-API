@@ -7,8 +7,4 @@ server.listen(3000,()=>{
    console.log('run in 3000');
 })
 
-const serverless = require('serverless-http');
-
-module.exports = serverless(app);
-
 
