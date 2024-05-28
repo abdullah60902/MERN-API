@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
-const serverless = require('serverless-http');
+
 
 const app = express();
 
@@ -35,4 +35,4 @@ app.use((req, res, next) => {
     });
 });
 
-module.exports.handler = serverless(app);
+module.exports = app;
