@@ -7,6 +7,7 @@ const User = require('./api/route/users')
 const Img = require('./api/route/img')
 const fileUpload = require('express-fileupload')
 const cors = require('cors')
+const serverless = require('serverless-http');
 
 mongoose.connect('mongodb+srv://abdullah:12345ab@abdullah.igvz11s.mongodb.net/?retryWrites=true&w=majority&appName=abdullah');
 
@@ -33,4 +34,4 @@ app.use((req, res, next) => {
         meg:"not found"
     })
 });
-module.exports = app;
+module.exports.handler =serverless( app);
