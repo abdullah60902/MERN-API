@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "rest",
   "main": "server.js",
-  "scripts": {
+  "scripts": { "start": "node server.js",
     "test": "test"
   },
   "keywords": [
