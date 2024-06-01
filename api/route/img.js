@@ -3,7 +3,7 @@ const router = express.Router()
 const mongoose = require('mongoose');
 const Img = require('../model/img');
 const cloudinary = require('cloudinary').v2
-
+const CheckAuth = require('../middleware/Checj-Auth')
 
 cloudinary.config({
     cloud_name:'dnukjgsdg',
@@ -11,8 +11,12 @@ cloudinary.config({
     api_secret:'aozGdyIc3kDPyPtiAkCQumfE6vs'
   });
 
+
+
   
-  router.post('/', (req, res, next) => {
+
+  
+  router.post('/',CheckAuth, (req, res, next) => {
       if (!req.files || Object.keys(req.files).length === 0) {
           return res.status(400).send('No files were uploaded.');
       }
