@@ -11,30 +11,45 @@ cloudinary.config({
     api_secret:'aozGdyIc3kDPyPtiAkCQumfE6vs'
   });
 
-  router.post('/',(req,res,next)=>{
-    const file = req.files.photo
-    console.log(file);
-    cloudinary.uploader.upload(file.tempFilePath,(err,result)=>{
-        console.log(result);
-        const img = new Img({
-            _id:new mongoose.Types.ObjectId,
-            photo:result.url
-        });
-        img.save()
-        .then(result=>{
-            res.status(200).json({
-                new_img:result
-            })
-        }).catch(err=>{
-            res.status(500).json({
-                error:err,
-                msg:"not work"
-
-            })
-        })
-        
-    })
-  })
+  
+  router.post('/', (req, res, next) => {
+      if (!req.files || Object.keys(req.files).length === 0) {
+          return res.status(400).send('No files were uploaded.');
+      }
+  
+      const file = req.files.photo;
+      console.log(file);
+  
+      cloudinary.uploader.upload(file.tempFilePath, (err, result) => {
+          if (err) {
+              console.error('Cloudinary upload error:', err);
+              return res.status(500).json({
+                  error: err,
+                  msg: "Cloudinary upload failed"
+              });
+          }
+  
+          const img = new Img({
+              _id: new mongoose.Types.ObjectId(),
+              photo: result.url
+          });
+  
+          img.save()
+              .then(result => {
+                  res.status(200).json({
+                      new_img: result
+                  });
+              })
+              .catch(err => {
+                  console.error('Database save error:', err);
+                  res.status(500).json({
+                      error: err,
+                      msg: "Database save failed"
+                  });
+              });
+      });
+  });
+  
 
   router.get('/',(req,res,next)=>{
     Img.find()
