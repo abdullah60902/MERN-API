@@ -29,7 +29,7 @@ app.use('/user', User);
 app.use("/student", Student);
 app.use('/img', Img);
 
-app.use((req, res, next) => {
+app.get("*",(req, res, next) => {
     res.status(404).json({
         msg: "not found"
     });
