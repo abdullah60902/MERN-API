@@ -3,7 +3,7 @@ const router = express.Router()
 const mongoose = require('mongoose');
 const Img = require('../model/img');
 const cloudinary = require('cloudinary').v2
-const CheckAuth = require('../middleware/Checj-Auth')
+
 
 cloudinary.config({
     cloud_name:'dnukjgsdg',
@@ -11,7 +11,7 @@ cloudinary.config({
     api_secret:'aozGdyIc3kDPyPtiAkCQumfE6vs'
   });
 
-  router.post('/',CheckAuth,(req,res,next)=>{
+  router.post('/',(req,res,next)=>{
     const file = req.files.photo
     console.log(file);
     cloudinary.uploader.upload(file.tempFilePath,(err,result)=>{
