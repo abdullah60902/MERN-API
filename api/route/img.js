@@ -32,16 +32,17 @@ cloudinary.config({
                   msg: "Cloudinary upload failed"
               });
           }
-  
+  console.log(result.public_id);
           const img = new Img({
               _id: new mongoose.Types.ObjectId(),
               photo: result.url
           });
-  
+
           img.save()
               .then(result => {
                   res.status(200).json({
-                      new_img: result
+                      new_img: result,
+                      public_id:result.public_id
                   });
               })
               .catch(err => {
@@ -84,7 +85,8 @@ const _id = req.params.id
 
 
   router.put('/:id',(req,res,next)=>{
-    const file= req.files.photo;
+    const file =req.files.photo;
+    
     cloudinary.uploader.upload(file.tempFilePath,(err,result)=>{
         console.log(result);
     Img.findByIdAndUpdate({_id:req.params.id},{
@@ -106,31 +108,74 @@ const _id = req.params.id
   })
 
   })
-  router.delete('/',(req, res, next) => {
-    const imageUrl = req.query.imageUrl;
-    const urlArray = imageUrl.split('/');
-    console.log(urlArray)
-    const image = urlArray[urlArray.length - 1]
-    console.log(image)
-    const imageName = image.split('.')[0]
-    console.log(imageName)
-    categoryId = req.query.id;
-    Img.findByIdAndDelete({ _id: categoryId })
-        .then(result => {
-            cloudinary.uploader.destroy(imageName,(error,tyuo)=>{
-                console.log(tyuo);
-            })
+  router.delete('/', async (req, res) => {
+    const { imageUrl, id: categoryId } = req.query;
+console.log(imageUrl);
+    try {
+        if (categoryId && imageUrl) {
+            const urlArray = imageUrl.split('/');
+            const image = urlArray[urlArray.length - 1];
+            const imageName = image.split('.')[0];
+
+            const deletedCategory = await Img.findByIdAndDelete(categoryId);
+            if (!deletedCategory) {
+                return res.status(404).json({ error: 'Category not found' });
+            }
+
+            // Delete the image from Cloudinary
+            await new Promise((resolve, reject) => {
+                cloudinary.uploader.destroy(imageName, (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                });
+            });
+
             res.status(200).json({
-                message: result
-            })
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            })
-        })
-  })
+                message: 'Image and category deleted successfully',
+                result: { deletedCategory }
+            });
+        } else if (imageUrl) {
+            const urlArray = imageUrl.split('/');
+            const image = urlArray[urlArray.length - 1];
+            const imageName = image.split('.')[0];
+
+            await new Promise((resolve, reject) => {
+                cloudinary.uploader.destroy(imageName, (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                });
+            });
+
+            res.status(200).json({
+                message: 'Image deleted successfully'
+            });
+        } else if (categoryId) {
+            const deletedCategory = await Img.findByIdAndDelete(categoryId);
+            if (!deletedCategory) {
+                return res.status(404).json({ error: 'Category not found' });
+            }
+
+            res.status(200).json({
+                message: 'Category deleted successfully',
+                result: deletedCategory
+            });
+        } else {
+            res.status(400).json({ error: 'Invalid request: missing categoryId or imageUrl' });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error: err.message
+        });
+    }
+});
+
 
 module.exports=router
 
